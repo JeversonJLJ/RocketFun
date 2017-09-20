@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1035625075123",
+    "firebase_url": "https://rocket-fun.firebaseio.com",
+    "project_id": "rocket-fun",
+    "storage_bucket": "rocket-fun.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1035625075123:android:ec85798689798088",
+        "android_client_info": {
+          "package_name": "com.jljsoluctions.rocketfun"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1035625075123-hnhj4noj0keg58lmdo1tcrpcc053tj9p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jljsoluctions.rocketfun",
+            "certificate_hash": "a1db938a2d996deaadfe044230319ad3253d93b8"
+          }
+        },
+        {
+          "client_id": "1035625075123-o6togkuhkl0l1vm93ue9t9c78st82t3e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuZnWdKbam1zcDG9kUiMVdg0r-P_VwRjA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1035625075123-o6togkuhkl0l1vm93ue9t9c78st82t3e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  Copyright (C) 2014 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/colorPrimary"
+    android:padding="@dimen/playback_controls_padding">
+
+    <ImageView
+        android:id="@+id/sound_image"
+        android:layout_width="@dimen/playback_controls_albumart_size"
+        android:layout_height="@dimen/playback_controls_albumart_size"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:contentDescription="@string/currently_playing_song"
+        android:scaleType="fitXY"
+        android:gravity="center_vertical"
+        tools:src="@drawable/new_sound" />
+
+
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/playback_controls_albumart_horizontal_margin"
+        android:layout_marginStart="@dimen/playback_controls_albumart_horizontal_margin"
+        android:layout_toEndOf="@id/sound_image"
+        android:layout_toRightOf="@id/sound_image"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.7"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/sound_title"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:contentDescription="@string/currently_playing_song"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/white"
+                tools:text="Go To Need a Tune About That 2 asdasdasdasdaqweqwe" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.3"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/set"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/play_pause"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_popup_reminder"
+                android:tint="@color/colorAccent"
+                android:tintMode="src_in" />
+
+            <ImageButton
+                android:id="@+id/play_stop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/play_pause"
+                android:padding="8dp"
+                android:src="@drawable/play"
+                android:tint="@color/colorAccent"
+                android:tintMode="src_in" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

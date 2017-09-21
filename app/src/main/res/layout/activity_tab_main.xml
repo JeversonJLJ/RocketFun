@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabMain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            app:tabGravity="fill"
+            app:tabIndicatorColor="@color/colorAccent"
+            app:tabMode="fixed"
+            app:tabSelectedTextColor="@color/white"
+            app:tabTextColor="@color/colorPrimaryDark">
+
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tabNews"
+                style="@style/TabItem"
+                android:icon="@drawable/tab_news_selector"
+                android:text="@string/tab_news_text" />
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tabSounds"
+                style="@style/TabItem"
+                android:icon="@drawable/tab_sounds_selector"
+                android:text="@string/tab_sounds_text" />
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tabLeaderboards"
+                style="@style/TabItem"
+                android:icon="@drawable/tab_leaderboard_selector"
+                android:text="@string/tab_leaderboard_text" />
+
+        </android.support.design.widget.TabLayout>
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/tabMain"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+
+
+    </RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

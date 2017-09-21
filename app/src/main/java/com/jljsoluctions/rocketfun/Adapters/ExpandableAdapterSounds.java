@@ -1,26 +1,18 @@
-package com.jljsoluctions.rocketfun;
+package com.jljsoluctions.rocketfun.Adapters;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,38 +21,35 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
+import com.jljsoluctions.rocketfun.BuildConfig;
+import com.jljsoluctions.rocketfun.GroupSound;
+import com.jljsoluctions.rocketfun.R;
+import com.jljsoluctions.rocketfun.Sound;
+import com.jljsoluctions.rocketfun.Util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import static android.support.v4.app.ActivityCompat.requestPermissions;
 
 
 /**
  * Created by Programacao on 19/01/2017.
  */
 
-public class AdapterSounds extends ArrayAdapter<Sound> {
+public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
     private LayoutInflater mInflater;
-    private List<Sound> soundList;
+    private HashMap<String, List<Sound>> soundList;
+    private List<GroupSound> soundGroupList;
     private MediaPlayer currentSound;
     private ImageButton currentPlayingButton;
     private Activity activity;
     private InterstitialAd interstitialAd;
     private AdRequest adRequest;
-    private static final int MY_READ_EXTERNAL_STORAGE = 1;
-    private static final int MY_WRITE_EXTERNAL_STORAGE = 2;
 
-    public AdapterSounds(Activity activity, int textViewResourceId,
-                         List<Sound> soundList) {
-        super(activity, textViewResourceId, soundList);
-        this.soundList = new ArrayList<Sound>();
-        this.soundList.addAll(soundList);
+
+    public ExpandableAdapterSounds(Activity activity, List<GroupSound> soundGroupList, HashMap<String, List<Sound>> soundList) {
+        this.soundList = soundList;
+        this.soundGroupList = soundGroupList;
         this.activity = activity;
         mInflater = LayoutInflater.from(activity);
 
@@ -80,7 +69,7 @@ public class AdapterSounds extends ArrayAdapter<Sound> {
 
             @Override
             public void onAdLoaded() {
-                interstitialAd.show();
+                //interstitialAd.show();
             }
         });
 
@@ -88,6 +77,75 @@ public class AdapterSounds extends ArrayAdapter<Sound> {
 
 
     }
+
+    @Override
+    public Object getChild(int groupPosition, int childPosititon) {
+        return this.soundList.get(this.soundGroupList.get(groupPosition).getGroupTitle())
+                .get(childPosititon);
+
+    }
+
+    @Override
+    public long getChildId(int groupPosition, int childPosition) {
+        return childPosition;
+    }
+
+    @Override
+    public int getChildrenCount(int groupPosition) {
+        return this.soundList.get(this.soundGroupList.get(groupPosition).getGroupTitle())
+                .size();
+    }
+
+    @Override
+    public Object getGroup(int groupPosition) {
+        return this.soundGroupList.get(groupPosition);
+    }
+
+    @Override
+    public int getGroupCount() {
+        return this.soundGroupList.size();
+    }
+
+    @Override
+    public long getGroupId(int groupPosition) {
+        return groupPosition;
+    }
+
+
+    @Override
+    public boolean hasStableIds() {
+        return false;
+    }
+
+    @Override
+    public boolean isChildSelectable(int groupPosition, int childPosition) {
+        return true;
+    }
+
+    @Override
+    public View getGroupView(int groupPosition, boolean isExpanded,
+                             View convertView, ViewGroup parent) {
+        GroupSound groupSound =(GroupSound) getGroup(groupPosition);
+        String headerTitle = groupSound.getGroupTitle();
+        if (convertView == null) {
+            LayoutInflater infalInflater = (LayoutInflater) this.activity
+                    .getSystemService(activity.LAYOUT_INFLATER_SERVICE);
+            convertView = infalInflater.inflate(R.layout.sound_list_group, null);
+        }
+        ImageView imgNewGroup = (ImageView) convertView
+                .findViewById(R.id.group_image);
+        TextView lblListHeader = (TextView) convertView
+                .findViewById(R.id.group_sound_title);
+        if(groupSound.isNewGroupSound())
+            imgNewGroup.setVisibility(View.VISIBLE);
+        else
+            imgNewGroup.setVisibility(View.INVISIBLE);
+        lblListHeader.setTypeface(null, Typeface.BOLD);
+        lblListHeader.setText(headerTitle);
+
+        return convertView;
+    }
+
 
     private class ViewHolder {
         TextView soundTitle;
@@ -97,15 +155,16 @@ public class AdapterSounds extends ArrayAdapter<Sound> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getChildView(int groupPosition, final int childPosition,
+                             boolean isLastChild, View convertView, ViewGroup parent) {
 
-        AdapterSounds.ViewHolder holder = null;
+        ExpandableAdapterSounds.ViewHolder holder = null;
 
         if (convertView == null) {
 
             convertView = mInflater.inflate(R.layout.sound_list_item, null);
 
-            holder = new AdapterSounds.ViewHolder();
+            holder = new ExpandableAdapterSounds.ViewHolder();
             holder.soundTitle = (TextView) convertView.findViewById(R.id.sound_title);
             holder.soundImage = (ImageView) convertView.findViewById(R.id.sound_image);
             holder.playStop = (ImageButton) convertView.findViewById(R.id.play_stop);
@@ -116,29 +175,31 @@ public class AdapterSounds extends ArrayAdapter<Sound> {
                 @Override
                 public void onClick(View v) {
                     final Sound clickedSound = (Sound) v.getTag();
-                    if (!clickedSound.isPlaying()) {
-                        if (currentSound != null) {
-                            currentSound.reset();
-                            currentPlayingButton.setImageResource(R.drawable.play);
-                        }
-                        currentPlayingButton = (ImageButton) v;
-                        currentPlayingButton.setImageResource(R.drawable.stop);
-                       //currentSound = MediaPlayer.create(mInflater.getContext(), clickedSound.getSoundRes());
-                        currentSound.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mp) {
-                                if (currentPlayingButton != null)
-                                    currentPlayingButton.setImageResource(R.drawable.play);
+                    if (Util.fileExists(clickedSound.getSoundUri().getPath())) {
+                        if (!clickedSound.isPlaying()) {
+                            if (currentSound != null) {
+                                currentSound.reset();
+                                currentPlayingButton.setImageResource(R.drawable.play);
                             }
-                        });
-                        clickedSound.setPlaying(true);
-                        currentSound.start();
+                            currentPlayingButton = (ImageButton) v;
+                            currentPlayingButton.setImageResource(R.drawable.stop);
+                            currentSound = MediaPlayer.create(mInflater.getContext(), clickedSound.getSoundUri());
+                            currentSound.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mp) {
+                                    if (currentPlayingButton != null)
+                                        currentPlayingButton.setImageResource(R.drawable.play);
+                                }
+                            });
+                            clickedSound.setPlaying(true);
+                            currentSound.start();
 
-                    } else {
-                        currentPlayingButton = (ImageButton) v;
-                        currentPlayingButton.setImageResource(R.drawable.play);
-                        clickedSound.setPlaying(false);
-                        currentSound.reset();
+                        } else {
+                            currentPlayingButton = (ImageButton) v;
+                            currentPlayingButton.setImageResource(R.drawable.play);
+                            clickedSound.setPlaying(false);
+                            currentSound.reset();
+                        }
                     }
                 }
             });
@@ -192,12 +253,14 @@ public class AdapterSounds extends ArrayAdapter<Sound> {
             });
 
         } else {
-            holder = (AdapterSounds.ViewHolder) convertView.getTag();
+            holder = (ExpandableAdapterSounds.ViewHolder) convertView.getTag();
         }
 
-        Sound sound = soundList.get(position);
+
+        Sound sound = (Sound) getChild(groupPosition, childPosition);
         holder.soundTitle.setText(sound.getSoundTitle());
-        //holder.soundImage.setImageResource(sound.getImageRes());
+        holder.soundImage.setImageURI(null);
+        holder.soundImage.setImageURI(sound.getImageUri());
         holder.playStop.setTag(sound);
         holder.setSound.setTag(sound);
 
@@ -205,11 +268,11 @@ public class AdapterSounds extends ArrayAdapter<Sound> {
 
     }
 
-    /* File saveRingtone(Sound sound) {
-        String ringtoneURI = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_RINGTONES) + "/" + getContext().getString(R.string.app_name);
+   /* private File saveRingtone(Sound sound) {
+        String ringtoneURI = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_RINGTONES) + "/" + activity.getString(R.string.app_name);
         new File(ringtoneURI).mkdirs();
         File soundFile = new File(ringtoneURI, sound.getSoundTitle());
-        InputStream inputStream = getContext().getResources().openRawResource(sound.getSoundRes());
+        InputStream inputStream = activity.getResources().openRawResource(sound.getSoundRes());
         try {
             FileOutputStream outputStream = new FileOutputStream(soundFile);
             byte[] buffer = new byte[1024];
@@ -231,36 +294,10 @@ public class AdapterSounds extends ArrayAdapter<Sound> {
         return null;
     }*/
 
-    public boolean checkWritePermission() {
-
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_WRITE_EXTERNAL_STORAGE);
-            return false;
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.System.canWrite(activity)) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-                intent.setData(Uri.parse("package:com.jljsoluctions.rocketfun"));
-                activity.startActivity(intent);
-            }
-        }
-        return true;
-    }
-
-    public boolean checkReadPermission() {
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_READ_EXTERNAL_STORAGE);
-            return false;
-        }
-        return true;
-    }
 
     private void setRingtone(Sound sound, boolean ringtone, boolean notification, boolean alarm) {
-        if (checkWritePermission() && checkReadPermission()) {
-            File soundFile = new File(sound.getSoundUri().toString(), sound.getSoundTitle());
+        if (Util.checkWritePermission(activity) && Util.checkReadPermission(activity)) {
+            File soundFile = new File(sound.getSoundUri().toString());
             if (soundFile != null) {
                 ContentValues values = new ContentValues();
                 values.put("_data", soundFile.getAbsolutePath());

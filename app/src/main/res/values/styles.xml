@@ -20,7 +20,11 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-
+    <style name="TabItem" parent="TextAppearance.Design.Tab">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">8sp</item>
+    </style>
 
     <style name="PopupMenu" parent="@android:style/Widget.PopupMenu">
         <item name="android:popupBackground">@color/colorPrimaryDark</item>

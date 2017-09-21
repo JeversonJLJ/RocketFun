@@ -15,4 +15,7 @@
     <string name="sounds">Sounds</string>
     <string name="email">Email</string>
     <string name="subject_email">Hi, I\'m using the Rocket Fun app</string>
+    <string name="tab_news_text">News</string>
+    <string name="tab_sounds_text">Sounds</string>
+    <string name="tab_leaderboard_text">Leaderboards</string>
 </resources>

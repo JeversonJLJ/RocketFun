@@ -10,6 +10,9 @@ import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import static android.support.v4.app.ActivityCompat.requestPermissions;
 
@@ -55,5 +58,19 @@ public class Util {
         else
             return false;
 
+    }
+
+    private void saveFile(String filePath, String fileName, byte[] file) {
+        new File(filePath).mkdirs();
+        File soundFile = new File(filePath, fileName);
+        try {
+            FileOutputStream outputStream = new FileOutputStream(soundFile);
+            outputStream.write(file);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e2) {
+            e2.printStackTrace();
+        }
     }
 }

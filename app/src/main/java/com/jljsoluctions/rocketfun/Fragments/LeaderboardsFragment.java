@@ -13,7 +13,9 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.jljsoluctions.rocketfun.Class.Preferences;
 import com.jljsoluctions.rocketfun.R;
+import com.jljsoluctions.rocketfun.Util;
 
 /**
  * Created by jever on 20/09/2017.
@@ -44,6 +46,19 @@ public class LeaderboardsFragment extends Fragment {
         rootView.setVisibility(View.VISIBLE);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.tab_leaderboards_swipe_refresh_layout);
+
+        Preferences preferencias = new Preferences(this.getActivity().getApplicationContext());
+        boolean onlyWifiConnected = false;
+        try {
+            onlyWifiConnected = preferencias.getUpdateTrackerWifiConnected();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (onlyWifiConnected)
+            if (!Util.checkWifiConected(this.getActivity()))
+                return rootView;
 
         webViewLeaderboards = (WebView) rootView.findViewById(R.id.webViewLeaderboards);
         webViewLeaderboards.getSettings().setJavaScriptEnabled(true);

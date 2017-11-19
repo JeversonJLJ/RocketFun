@@ -38,14 +38,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.jljsoluctions.rocketfun.Util.APP_STORAGE_PATCH;
+
 /**
  * Created by jever on 20/09/2017.
  */
 
 public class SoundsFragment extends Fragment {
 
-    public String mAppURI;
-    public static int CURRENT_DOWNLOADS;
+
+
     private ExpandableListView mlvwSongs;
     private List<GroupSound> mlistDataHeader;
     private HashMap<String, List<Sound>> mlistDataChild;
@@ -77,7 +79,7 @@ public class SoundsFragment extends Fragment {
         rootView.setVisibility(View.VISIBLE);
 
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
-        mAppURI = Environment.getExternalStorageDirectory().getAbsolutePath() + "/RocketFun";
+
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReferenceFromUrl("gs://rocket-fun.appspot.com/");
 
@@ -148,7 +150,7 @@ public class SoundsFragment extends Fragment {
                 }
             }
         }
-        updateAdapter();
+        mlistAdapter.notifyDataSetChanged();
     }
 
     private void addSound(DataSnapshot dataSnapshot) {
@@ -168,22 +170,19 @@ public class SoundsFragment extends Fragment {
             sounds = new ArrayList<Sound>();
         final String imageName = dataSnapshot.child("ImageName").getValue(String.class);
         final String soundName = dataSnapshot.child("SoundName").getValue(String.class);
-        String imagePath = mAppURI + "/" + imageName;
-        String soundPath = mAppURI + "/" + soundName;
+        String imagePath = APP_STORAGE_PATCH + "/" + imageName;
+        String soundPath = APP_STORAGE_PATCH + "/" + soundName;
 
-        if (!Util.fileExists(mAppURI + "/" + imageName)) {
+        //Image downlaod
+        if (!Util.fileExists(APP_STORAGE_PATCH + "/" + imageName)) {
             mStorageRef = mStorage.getReferenceFromUrl(dataSnapshot.child("ImageURL").getValue(String.class));
-            new File(mAppURI).mkdirs();
-            File imageFile = new File(mAppURI, imageName);
-            downloadFile(mStorageRef, imageFile);
+            new File(APP_STORAGE_PATCH).mkdirs();
+            File imageFile = new File(APP_STORAGE_PATCH, imageName);
+            Util.firebaseDownloadFile(this.getActivity(),mStorageRef, imageFile);
         }
-        if (!Util.fileExists(mAppURI + "/" + dataSnapshot.child("SoundName").getValue(String.class))) {
-            mStorageRef = mStorage.getReferenceFromUrl(dataSnapshot.child("SoundURL").getValue(String.class));
-            new File(mAppURI).mkdirs();
-            File soundFile = new File(mAppURI, soundName);
-            downloadFile(mStorageRef, soundFile);
-        }
-        Sound newSound = new Sound(dataSnapshot.child("SoundDescription").getValue(String.class), Uri.parse(imagePath), Uri.parse(soundPath), Long.parseLong(dataSnapshot.child("id").getValue(String.class)));
+
+
+        Sound newSound = new Sound(dataSnapshot.child("SoundDescription").getValue(String.class), soundName, Uri.parse(imagePath), Uri.parse(soundPath), Long.parseLong(dataSnapshot.child("id").getValue(String.class)),mStorage.getReferenceFromUrl(dataSnapshot.child("SoundURL").getValue(String.class)));
         boolean existsSound = false;
         for (Sound item : sounds) {
             if (item.getSoundTitle().equals(newSound.getSoundTitle()))
@@ -194,7 +193,8 @@ public class SoundsFragment extends Fragment {
 
 
         mlistDataChild.put(dataSnapshot.child("GroupDescription").getValue(String.class), sounds); // Header, Child data
-        updateAdapter();
+        mlistAdapter.notifyDataSetChanged();
+
     }
 
     private void loading(final boolean progressVisible) {
@@ -253,36 +253,6 @@ public class SoundsFragment extends Fragment {
 
     }
 
-    public void downloadFile(final StorageReference storageRef, final File file) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (CURRENT_DOWNLOADS >= 5) {
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    CURRENT_DOWNLOADS++;
-                    storageRef.getFile(file).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            CURRENT_DOWNLOADS--;
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            CURRENT_DOWNLOADS--;
-                        }
-                    });
-                } catch (Exception e) {
-                    Toast.makeText(SoundsFragment.this.getActivity(), e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        }).start();
-    }
+
 
 }

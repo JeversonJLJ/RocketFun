@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings"
+    android:background="@color/colorPrimaryDark"
+    >
+
+    <PreferenceCategory
+        android:key="cat_update_news_when_start"
+        android:title="@string/settings_cat_update_news_when_start_title"
+
+        >
+
+        <SwitchPreference
+            android:key="chk_pref_update_news_when_start_only_wifi"
+            android:title="Only Wi-Fi"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="cat_update_tracker_when_start"
+        android:title="@string/settings_cat_update_tracker_when_start_title">
+
+        <SwitchPreference
+            android:key="chk_pref_update_tracker_when_start_only_wifi"
+            android:title="Only Wi-Fi"
+            />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

@@ -2,6 +2,8 @@ package com.jljsoluctions.rocketfun;
 
 import android.net.Uri;
 
+import com.google.firebase.storage.StorageReference;
+
 /**
  * Created by jever on 18/03/2017.
  */
@@ -9,17 +11,21 @@ import android.net.Uri;
 public class Sound {
 
     private String soundTitle;
+    private String soundName;
+    private StorageReference firebaseStorageRef;
     private boolean playing;
     private Uri imageUri;
     private Uri soundUri;
     private long id;
 
 
-    public Sound(String soundTitle, Uri imageUri, Uri soundUri, long id){
+    public Sound(String soundTitle,String soundName, Uri imageUri, Uri soundUri, long id, StorageReference firebaseStorageRef){
         this.soundTitle = soundTitle;
+        this.soundName = soundName;
         this.imageUri = imageUri;
         this.soundUri = soundUri;
         this.id = id;
+        this.firebaseStorageRef = firebaseStorageRef;
     }
 
     public long getId() {
@@ -60,5 +66,21 @@ public class Sound {
 
     public void setPlaying(boolean playing) {
         this.playing = playing;
+    }
+
+    public String getSoundName() {
+        return soundName;
+    }
+
+    public void setSoundName(String soundName) {
+        this.soundName = soundName;
+    }
+
+    public StorageReference getFirebaseStorageRef() {
+        return firebaseStorageRef;
+    }
+
+    public void setFirebaseStorageRef(StorageReference firebaseStorageRef) {
+        this.firebaseStorageRef = firebaseStorageRef;
     }
 }

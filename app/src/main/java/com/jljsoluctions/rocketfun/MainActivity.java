@@ -10,6 +10,8 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -18,7 +20,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
+
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -36,6 +40,10 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
 
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+
+    ViewPager mViewPager;
     //This is our tablayout
     private TabLayout tabLayout;
 
@@ -49,9 +57,6 @@ public class MainActivity extends AppCompatActivity
     LeaderboardsFragment leaderboardsFragment;
     NewsFragment newsFragment;
     SoundsFragment soundsFragment;
-
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
 
 
     @Override
@@ -70,7 +75,7 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        //navigationView.setBackgroundResource(R.color.white);
+
         int colorPrimaryDark = 0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             colorPrimaryDark = getResources().getColor(R.color.colorPrimary, null);
@@ -127,6 +132,8 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
+
+
         //Initializing viewPager
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         viewPager.setOffscreenPageLimit(3);
@@ -138,7 +145,7 @@ public class MainActivity extends AppCompatActivity
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition(),false);
+                viewPager.setCurrentItem(tab.getPosition(), false);
             }
 
             @Override
@@ -169,7 +176,6 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
-
     }
 
     @Override
@@ -188,18 +194,16 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void setupViewPager(ViewPager viewPager)
-    {
+    private void setupViewPager(ViewPager viewPager) {
         adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        leaderboardsFragment =new LeaderboardsFragment();
-        newsFragment =new NewsFragment();
-        soundsFragment =new SoundsFragment();
-        adapter.addFragment(newsFragment,"News");
-        adapter.addFragment(soundsFragment,"Sounds");
-        adapter.addFragment(leaderboardsFragment,"Leaderboards");
+        leaderboardsFragment = new LeaderboardsFragment();
+        newsFragment = new NewsFragment();
+        soundsFragment = new SoundsFragment();
+        adapter.addFragment(newsFragment, "News");
+        adapter.addFragment(soundsFragment, "Sounds");
+        adapter.addFragment(leaderboardsFragment, "Leaderboards");
         viewPager.setAdapter(adapter);
     }
-
 
 
     @Override
@@ -239,8 +243,11 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
 
-        if (id == R.id.nav_sounds) {
+        if (id == R.id.nav_main) {
 
+        } else if (id == R.id.nav_settings){
+            Intent i = new Intent(MainActivity.this, SettingsActivity.class);
+            MainActivity.this.startActivity(i);
         } else if (id == R.id.nav_email) {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("message/rfc822");
@@ -253,6 +260,7 @@ public class MainActivity extends AppCompatActivity
 
             }
         }
+
         return true;
     }
 }

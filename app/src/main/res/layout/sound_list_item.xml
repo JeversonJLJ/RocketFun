@@ -59,7 +59,7 @@
                 android:ellipsize="end"
                 android:maxLines="3"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/white"
+                android:textColor="@color/colorAccent"
                 tools:text="Go To Need a Tune About That 2 asdasdasdasdaqweqwe" />
         </LinearLayout>
 
@@ -78,7 +78,7 @@
                 android:contentDescription="@string/play_pause"
                 android:padding="8dp"
                 android:src="@android:drawable/ic_popup_reminder"
-                android:tint="@color/colorAccent"
+                android:tint="@color/grey"
                 android:tintMode="src_in" />
 
             <ImageButton
@@ -90,8 +90,19 @@
                 android:contentDescription="@string/play_pause"
                 android:padding="8dp"
                 android:src="@drawable/play"
-                android:tint="@color/colorAccent"
+                android:tint="@color/grey"
                 android:tintMode="src_in" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:visibility="gone"
+                android:background="?selectableItemBackgroundBorderless"
+
+                android:layout_weight="1" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

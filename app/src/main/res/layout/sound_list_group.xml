@@ -51,7 +51,7 @@
             android:maxLines="1"
             android:layout_centerVertical="true"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/white"
+            android:textColor="@color/colorAccent"
             tools:text="Group Name" />
 
     </RelativeLayout>

@@ -16,7 +16,7 @@
             app:tabGravity="fill"
             app:tabIndicatorColor="@color/colorAccent"
             app:tabMode="fixed"
-            app:tabSelectedTextColor="@color/white"
+            app:tabSelectedTextColor="@color/grey"
             app:tabTextColor="@color/colorPrimaryDark">
 
 

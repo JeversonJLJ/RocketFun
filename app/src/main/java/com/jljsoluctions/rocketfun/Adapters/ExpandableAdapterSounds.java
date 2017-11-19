@@ -2,6 +2,7 @@ package com.jljsoluctions.rocketfun.Adapters;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,14 +24,20 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.jljsoluctions.rocketfun.BuildConfig;
+import com.jljsoluctions.rocketfun.Fragments.SoundsFragment;
 import com.jljsoluctions.rocketfun.GroupSound;
 import com.jljsoluctions.rocketfun.R;
 import com.jljsoluctions.rocketfun.Sound;
 import com.jljsoluctions.rocketfun.Util;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
+
+import static com.jljsoluctions.rocketfun.Util.APP_STORAGE_PATCH;
 
 
 /**
@@ -42,9 +50,11 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
     private List<GroupSound> soundGroupList;
     private MediaPlayer currentSound;
     private ImageButton currentPlayingButton;
+    private ProgressBar currentProgressBar;
     private Activity activity;
     private InterstitialAd interstitialAd;
     private AdRequest adRequest;
+    private boolean downloadingSound = false;
 
 
     public ExpandableAdapterSounds(Activity activity, List<GroupSound> soundGroupList, HashMap<String, List<Sound>> soundList) {
@@ -125,7 +135,7 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
-        GroupSound groupSound =(GroupSound) getGroup(groupPosition);
+        GroupSound groupSound = (GroupSound) getGroup(groupPosition);
         String headerTitle = groupSound.getGroupTitle();
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this.activity
@@ -136,7 +146,7 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
                 .findViewById(R.id.group_image);
         TextView lblListHeader = (TextView) convertView
                 .findViewById(R.id.group_sound_title);
-        if(groupSound.isNewGroupSound())
+        if (groupSound.isNewGroupSound())
             imgNewGroup.setVisibility(View.VISIBLE);
         else
             imgNewGroup.setVisibility(View.INVISIBLE);
@@ -152,11 +162,31 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
         ImageView soundImage;
         ImageButton playStop;
         ImageButton setSound;
+        ProgressBar progressBar;
+    }
+
+    private void playSound(Sound clickedSound, View viewHolder){
+        if (currentSound != null) {
+            currentSound.reset();
+            currentPlayingButton.setImageResource(R.drawable.play);
+        }
+        currentPlayingButton = (ImageButton) viewHolder;
+        currentPlayingButton.setImageResource(R.drawable.stop);
+        currentSound = MediaPlayer.create(mInflater.getContext(), clickedSound.getSoundUri());
+        currentSound.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                if (currentPlayingButton != null)
+                    currentPlayingButton.setImageResource(R.drawable.play);
+            }
+        });
+        clickedSound.setPlaying(true);
+        currentSound.start();
     }
 
     @Override
-    public View getChildView(int groupPosition, final int childPosition,
-                             boolean isLastChild, View convertView, ViewGroup parent) {
+    public View getChildView(final int groupPosition, final int childPosition,
+                             boolean isLastChild, View convertView, final ViewGroup parent) {
 
         ExpandableAdapterSounds.ViewHolder holder = null;
 
@@ -169,36 +199,49 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
             holder.soundImage = (ImageView) convertView.findViewById(R.id.sound_image);
             holder.playStop = (ImageButton) convertView.findViewById(R.id.play_stop);
             holder.setSound = (ImageButton) convertView.findViewById(R.id.set);
+            holder.progressBar = (ProgressBar) convertView.findViewById(R.id.progressBar);
             convertView.setTag(holder);
 
+            final ViewHolder finalHolder = holder;
             holder.playStop.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    final Sound clickedSound = (Sound) v.getTag();
+                public void onClick(final View viewHolder) {
+                    final Sound clickedSound = (Sound) viewHolder.getTag();
                     if (Util.fileExists(clickedSound.getSoundUri().getPath())) {
                         if (!clickedSound.isPlaying()) {
-                            if (currentSound != null) {
-                                currentSound.reset();
-                                currentPlayingButton.setImageResource(R.drawable.play);
-                            }
-                            currentPlayingButton = (ImageButton) v;
-                            currentPlayingButton.setImageResource(R.drawable.stop);
-                            currentSound = MediaPlayer.create(mInflater.getContext(), clickedSound.getSoundUri());
-                            currentSound.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                @Override
-                                public void onCompletion(MediaPlayer mp) {
-                                    if (currentPlayingButton != null)
-                                        currentPlayingButton.setImageResource(R.drawable.play);
-                                }
-                            });
-                            clickedSound.setPlaying(true);
-                            currentSound.start();
-
+                            playSound(clickedSound,viewHolder);
                         } else {
-                            currentPlayingButton = (ImageButton) v;
+                            currentPlayingButton = (ImageButton) viewHolder;
                             currentPlayingButton.setImageResource(R.drawable.play);
                             clickedSound.setPlaying(false);
                             currentSound.reset();
+                        }
+                    } else {
+                        //Sound download
+                        if (!downloadingSound) {
+                            if (!Util.fileExists(clickedSound.getSoundUri().getPath())) {
+                                downloadingSound = true;
+                                finalHolder.playStop.setVisibility(View.GONE);
+                                finalHolder.progressBar.setVisibility(View.VISIBLE);
+                                new File(APP_STORAGE_PATCH).mkdirs();
+                                File soundFile = new File(APP_STORAGE_PATCH, clickedSound.getSoundName());
+
+
+                                Util.asynchronousFirebaseDownloadFile(activity, clickedSound.getFirebaseStorageRef(), soundFile, new Util.OnAsynchronousFirebaseDownloadFile() {
+                                    @Override
+                                    public void onAsynchronousFirebaseDownloadFile(String filePatch, boolean sucess, Exception e) {
+                                        finalHolder.playStop.setVisibility(View.VISIBLE);
+                                        finalHolder.progressBar.setVisibility(View.GONE);
+                                        downloadingSound = false;
+                                        if (sucess) {
+                                            playSound(clickedSound,viewHolder);
+                                        } else {
+                                            Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+
+                            }
                         }
                     }
                 }
@@ -257,12 +300,20 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
         }
 
 
+        // new Thread(new Runnable() {
+        //    @Override
+        //      public void run() {
         Sound sound = (Sound) getChild(groupPosition, childPosition);
         holder.soundTitle.setText(sound.getSoundTitle());
+
+
         holder.soundImage.setImageURI(null);
         holder.soundImage.setImageURI(sound.getImageUri());
         holder.playStop.setTag(sound);
         holder.setSound.setTag(sound);
+        //       }
+        //   }).start();
+
 
         return convertView;
 

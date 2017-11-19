@@ -18,4 +18,9 @@
     <string name="tab_news_text">News</string>
     <string name="tab_sounds_text">Sounds</string>
     <string name="tab_leaderboard_text">Leaderboards</string>
+    <string name="settings_cat_general_title">General</string>
+    <string name="settings_cat_update_news_when_start_title">Update news when start</string>
+    <string name="settings_cat_update_tracker_when_start_title">Update tracker when start</string>
+    <string name="main">Main</string>
+    <string name="settings">Settings</string>
 </resources>

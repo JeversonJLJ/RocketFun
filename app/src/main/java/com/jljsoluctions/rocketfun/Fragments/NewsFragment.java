@@ -13,6 +13,11 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.jljsoluctions.rocketfun.Class.Preferences;
 import com.jljsoluctions.rocketfun.R;
 import com.jljsoluctions.rocketfun.Util;
@@ -61,13 +66,51 @@ public class NewsFragment extends Fragment {
             if (!Util.checkWifiConected(this.getActivity()))
                 return rootView;
 
+        DatabaseReference mDataBase;
+        mDataBase = FirebaseDatabase.getInstance().getReference().child("News");
+        mDataBase.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(final DataSnapshot dataSnapshot, String s) {
+                updateNews(dataSnapshot.getValue(String.class));
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                updateNews(dataSnapshot.getValue(String.class));
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
+
+
+        return rootView;
+    }
+
+    private void updateNews(final String url){
         webViewNews = (WebView) rootView.findViewById(R.id.webViewNews);
         webViewNews.getSettings().setJavaScriptEnabled(true);
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                webViewNews.loadUrl("https://www.rocketleague.com/news");
+                webViewNews.loadUrl(url);
             }
         });
         webViewNews.setWebViewClient(new WebViewClient() {
@@ -76,10 +119,8 @@ public class NewsFragment extends Fragment {
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
-        webViewNews.loadUrl("https://www.rocketleague.com/news");
+        webViewNews.loadUrl(url);
         mSwipeRefreshLayout.setRefreshing(true);
-
-        return rootView;
     }
 
     @Override

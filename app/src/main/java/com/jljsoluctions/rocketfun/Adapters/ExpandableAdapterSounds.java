@@ -3,6 +3,8 @@ package com.jljsoluctions.rocketfun.Adapters;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -162,7 +164,8 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
         ImageView soundImage;
         ImageButton playStop;
         ImageButton setSound;
-        ProgressBar progressBar;
+        ProgressBar progressBarPlayStop;
+        ProgressBar progressBarRingtone;
     }
 
     private void playSound(Sound clickedSound, View viewHolder){
@@ -199,7 +202,10 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
             holder.soundImage = (ImageView) convertView.findViewById(R.id.sound_image);
             holder.playStop = (ImageButton) convertView.findViewById(R.id.play_stop);
             holder.setSound = (ImageButton) convertView.findViewById(R.id.set);
-            holder.progressBar = (ProgressBar) convertView.findViewById(R.id.progressBar);
+            holder.progressBarPlayStop = (ProgressBar) convertView.findViewById(R.id.progressBarPlayStop);
+            holder.progressBarRingtone = (ProgressBar) convertView.findViewById(R.id.progressBarRingtone);
+            holder.progressBarPlayStop.getIndeterminateDrawable().setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
+            holder.progressBarRingtone.getIndeterminateDrawable().setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
             convertView.setTag(holder);
 
             final ViewHolder finalHolder = holder;
@@ -222,7 +228,7 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
                             if (!Util.fileExists(clickedSound.getSoundUri().getPath())) {
                                 downloadingSound = true;
                                 finalHolder.playStop.setVisibility(View.GONE);
-                                finalHolder.progressBar.setVisibility(View.VISIBLE);
+                                finalHolder.progressBarPlayStop.setVisibility(View.VISIBLE);
                                 new File(APP_STORAGE_PATCH).mkdirs();
                                 File soundFile = new File(APP_STORAGE_PATCH, clickedSound.getSoundName());
 
@@ -231,7 +237,7 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
                                     @Override
                                     public void onAsynchronousFirebaseDownloadFile(String filePatch, boolean sucess, Exception e) {
                                         finalHolder.playStop.setVisibility(View.VISIBLE);
-                                        finalHolder.progressBar.setVisibility(View.GONE);
+                                        finalHolder.progressBarPlayStop.setVisibility(View.GONE);
                                         downloadingSound = false;
                                         if (sucess) {
                                             playSound(clickedSound,viewHolder);
@@ -250,46 +256,38 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
             holder.setSound.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-
                     final Sound clickedSound = (Sound) v.getTag();
+                    if (!Util.fileExists(clickedSound.getSoundUri().getPath())) {
+                        if (!downloadingSound) {
+                            if (!Util.fileExists(clickedSound.getSoundUri().getPath())) {
+                                downloadingSound = true;
+                                finalHolder.setSound.setVisibility(View.GONE);
+                                finalHolder.progressBarRingtone.setVisibility(View.VISIBLE);
+                                new File(APP_STORAGE_PATCH).mkdirs();
+                                File soundFile = new File(APP_STORAGE_PATCH, clickedSound.getSoundName());
+                                Util.asynchronousFirebaseDownloadFile(activity, clickedSound.getFirebaseStorageRef(), soundFile, new Util.OnAsynchronousFirebaseDownloadFile() {
+                                    @Override
+                                    public void onAsynchronousFirebaseDownloadFile(String filePatch, boolean sucess, Exception e) {
+                                        finalHolder.setSound.setVisibility(View.VISIBLE);
+                                        finalHolder.progressBarRingtone.setVisibility(View.GONE);
+                                        downloadingSound = false;
+                                        if (sucess) {
+                                            showPopupMenu(v, clickedSound);
+                                        } else {
+                                            Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
 
-                    /** Instantiating PopupMenu class */
-                    PopupMenu popup = new PopupMenu(activity, v);
-
-                    /** Adding menu items to the popumenu */
-                    popup.getMenuInflater().inflate(R.menu.set_sound, popup.getMenu());
-
-                    /** Defining menu item click listener for the popup menu */
-                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            if (BuildConfig.DEBUG) {
-                                adRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build();
-                            } else {
-                                adRequest = new AdRequest.Builder().build();
                             }
-                            interstitialAd.loadAd(adRequest);
-
-                            if (interstitialAd.isLoaded()) {
-                                interstitialAd.show();
-                            } else {
-                                int id = item.getItemId();
-
-                                if (id == R.id.set_ringtone) {
-                                    setRingtone(clickedSound, true, false, false);
-                                } else if (id == R.id.set_alarm) {
-                                    setRingtone(clickedSound, false, false, true);
-                                } else if (id == R.id.set_notification) {
-                                    setRingtone(clickedSound, false, true, false);
-                                }
-                            }
-                            return true;
                         }
-                    });
+                    }
+                    else{
+                        showPopupMenu(v,clickedSound);
+                    }
 
-                    /** Showing the popup menu */
-                    popup.show();
+
+
                 }
 
 
@@ -319,6 +317,45 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
 
     }
 
+    private void showPopupMenu(View v, final Sound clickedSound){
+        /** Instantiating PopupMenu class */
+        PopupMenu popup = new PopupMenu(activity, v);
+
+        /** Adding menu items to the popumenu */
+        popup.getMenuInflater().inflate(R.menu.set_sound, popup.getMenu());
+
+        /** Defining menu item click listener for the popup menu */
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (BuildConfig.DEBUG) {
+                    adRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build();
+                } else {
+                    adRequest = new AdRequest.Builder().build();
+                }
+                interstitialAd.loadAd(adRequest);
+
+                if (interstitialAd.isLoaded()) {
+                    interstitialAd.show();
+                } else {
+                    int id = item.getItemId();
+
+                    if (id == R.id.set_ringtone) {
+                        setRingtone(clickedSound, true, false, false);
+                    } else if (id == R.id.set_alarm) {
+                        setRingtone(clickedSound, false, false, true);
+                    } else if (id == R.id.set_notification) {
+                        setRingtone(clickedSound, false, true, false);
+                    }
+                }
+                return true;
+            }
+        });
+
+        /** Showing the popup menu */
+        popup.show();
+    }
    /* private File saveRingtone(Sound sound) {
         String ringtoneURI = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_RINGTONES) + "/" + activity.getString(R.string.app_name);
         new File(ringtoneURI).mkdirs();

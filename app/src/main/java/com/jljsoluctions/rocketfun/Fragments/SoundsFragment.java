@@ -85,7 +85,6 @@ public class SoundsFragment extends Fragment {
 
         mlistDataHeader = new ArrayList<GroupSound>();
         mlistDataChild = new HashMap<String, List<Sound>>();
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         loading(true);
         if (Util.checkWritePermission(this.getActivity()) && Util.checkReadPermission(this.getActivity())) {
             new Thread(new Runnable() {

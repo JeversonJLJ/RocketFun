@@ -13,6 +13,11 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.jljsoluctions.rocketfun.Class.Preferences;
 import com.jljsoluctions.rocketfun.R;
 import com.jljsoluctions.rocketfun.Util;
@@ -60,13 +65,47 @@ public class LeaderboardsFragment extends Fragment {
             if (!Util.checkWifiConected(this.getActivity()))
                 return rootView;
 
+
+        DatabaseReference mDataBase;
+        mDataBase = FirebaseDatabase.getInstance().getReference().child("Tracker");
+        mDataBase.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(final DataSnapshot dataSnapshot, String s) {
+                updateLeaderBoards(dataSnapshot.getValue(String.class));
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                updateLeaderBoards(dataSnapshot.getValue(String.class));
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        return rootView;
+    }
+
+    private void updateLeaderBoards(final String url){
         webViewLeaderboards = (WebView) rootView.findViewById(R.id.webViewLeaderboards);
         webViewLeaderboards.getSettings().setJavaScriptEnabled(true);
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                webViewLeaderboards.loadUrl("https://rocketleague.tracker.network/leaderboards/all");
+                webViewLeaderboards.loadUrl(url);
             }
         });
         webViewLeaderboards.setWebViewClient(new WebViewClient() {
@@ -75,12 +114,9 @@ public class LeaderboardsFragment extends Fragment {
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
-        webViewLeaderboards.loadUrl("https://rocketleague.tracker.network/leaderboards/all");
+        webViewLeaderboards.loadUrl(url);
         mSwipeRefreshLayout.setRefreshing(true);
-
-        return rootView;
     }
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main, menu);

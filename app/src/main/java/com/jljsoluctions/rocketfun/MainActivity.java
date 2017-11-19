@@ -21,6 +21,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -30,6 +32,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 import com.jljsoluctions.rocketfun.Adapters.ViewPagerAdapter;
 import com.jljsoluctions.rocketfun.Fragments.LeaderboardsFragment;
 import com.jljsoluctions.rocketfun.Fragments.NewsFragment;
@@ -53,7 +56,6 @@ public class MainActivity extends AppCompatActivity
     ViewPagerAdapter adapter;
 
     //Fragments
-
     LeaderboardsFragment leaderboardsFragment;
     NewsFragment newsFragment;
     SoundsFragment soundsFragment;
@@ -65,6 +67,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -72,6 +76,7 @@ public class MainActivity extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -86,6 +91,8 @@ public class MainActivity extends AppCompatActivity
         navigationView.setBackgroundColor(colorPrimaryDark);
         navigationView.setItemTextColor(ColorStateList.valueOf(Color.WHITE));
         navigationView.setItemIconTintList(ColorStateList.valueOf(Color.WHITE));
+
+
 
         AdView adView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest;
@@ -141,7 +148,10 @@ public class MainActivity extends AppCompatActivity
 
         //Initializing the tablayout
         tabLayout = (TabLayout) findViewById(R.id.tabMain);
-
+        allotEachTabWithEqualWidth();
+        //Set start tab as Sounds tab
+        //tabLayout.getTabAt(1).select();
+        //viewPager.setCurrentItem(1,false);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -177,6 +187,19 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+
+    private void allotEachTabWithEqualWidth() {
+
+        ViewGroup slidingTabStrip = (ViewGroup) tabLayout.getChildAt(0);
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            View tab = slidingTabStrip.getChildAt(i);
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) tab.getLayoutParams();
+            layoutParams.weight = 1;
+            tab.setLayoutParams(layoutParams);
+        }
+
+    }
+
 
     @Override
     public void onStart() {

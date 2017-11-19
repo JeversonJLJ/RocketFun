@@ -15,9 +15,9 @@
             android:background="@color/colorPrimary"
             app:tabGravity="fill"
             app:tabIndicatorColor="@color/colorAccent"
-            app:tabMode="fixed"
-            app:tabSelectedTextColor="@color/grey"
-            app:tabTextColor="@color/colorPrimaryDark">
+            app:tabMode="scrollable"
+            app:tabSelectedTextColor="@color/colorAccent"
+            app:tabTextColor="@color/grey">
 
 
             <android.support.design.widget.TabItem
@@ -34,6 +34,7 @@
 
             <android.support.design.widget.TabItem
                 android:id="@+id/tabLeaderboards"
+
                 style="@style/TabItem"
                 android:icon="@drawable/tab_leaderboard_selector"
                 android:text="@string/tab_leaderboard_text" />

@@ -24,4 +24,10 @@
     <string name="main">Main</string>
     <string name="settings">Settings</string>
     <string name="tab_tracker_text">Tracker</string>
+    <string name="ok_message_dialog">OK</string>
+    <string name="storage_permission_message">For the application to be able to download the sounds you need to grant storage permission. On the next screen, click on permissions and set the storage flag.</string>
+    <string name="write_settings_permission_message">For the application can set the sounds as ringtone, alarm or notification. On the next screen set the write settings flag.</string>
+    <string name="sound_successful_set_ringtone">Sound successful set as ringtone!</string>
+    <string name="sound_successful_set_alarm">Sound successful set as alarm!</string>
+    <string name="sound_successful_set_notification">Sound successful set as notification!</string>
 </resources>

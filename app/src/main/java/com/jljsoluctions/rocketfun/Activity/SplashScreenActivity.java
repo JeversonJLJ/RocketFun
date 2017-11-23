@@ -1,9 +1,11 @@
-package com.jljsoluctions.rocketfun;
+package com.jljsoluctions.rocketfun.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+
+import com.jljsoluctions.rocketfun.R;
 
 /**
  * Created by jever on 11/07/2017.

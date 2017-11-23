@@ -1,6 +1,7 @@
-package com.jljsoluctions.rocketfun;
+package com.jljsoluctions.rocketfun.Class;
 
 import android.*;
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.StorageReference;
+import com.jljsoluctions.rocketfun.*;
+import com.jljsoluctions.rocketfun.Activity.MainActivity;
+import com.jljsoluctions.rocketfun.Dialog.Dialog;
 import com.jljsoluctions.rocketfun.Fragments.SoundsFragment;
 
 import java.io.File;
@@ -32,14 +36,38 @@ import static android.support.v4.app.ActivityCompat.requestPermissions;
  * Created by jever on 02/07/2017.
  */
 
-public class Util {
-    private static final int MY_READ_EXTERNAL_STORAGE = 1;
-    private static final int MY_WRITE_EXTERNAL_STORAGE = 2;
+public class Useful {
+    public static final int MY_READ_EXTERNAL_STORAGE = 1;
+    public static final int MY_WRITE_EXTERNAL_STORAGE = 2;
+    public static final int MY_WRITE_SETTINGS = 3;
+    public static final int MY_CALL_APP_DETAILS = 4;
     private static int CURRENT_DOWNLOADS;
+    public static boolean firebasePersistenceCalledAlready = false;
     public static final String APP_STORAGE_PATCH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/RocketFun";
-    ;
 
-    public static boolean checkWritePermission(Activity activity) {
+    public static boolean checkWriteSettingsPermission(final Activity activity) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (!Settings.System.canWrite(activity)) {
+                Dialog.showDialogMessage(activity, activity.getString(com.jljsoluctions.rocketfun.R.string.write_settings_permission_message), new Dialog.OnClickOkDialogMessage() {
+                    @Override
+                    public void onClickOkDialogMessage() {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                        intent.setData(Uri.parse("package:com.jljsoluctions.rocketfun"));
+                        activity.startActivityForResult(intent,MY_WRITE_SETTINGS);
+
+                    }
+                });
+                return false;
+
+            }
+            return true;
+        }
+        return true;
+    }
+
+    public static boolean checkStorageWritePermission(Activity activity) {
 
         if (ContextCompat.checkSelfPermission(activity, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -47,24 +75,30 @@ public class Util {
             return false;
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.System.canWrite(activity)) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-                intent.setData(Uri.parse("package:com.jljsoluctions.rocketfun"));
-                activity.startActivity(intent);
-            }
-        }
         return true;
     }
 
-    public static boolean checkReadPermission(Activity activity) {
+    public static boolean checkStorageReadPermission(Activity activity) {
         if (ContextCompat.checkSelfPermission(activity, android.Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(activity, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, MY_READ_EXTERNAL_STORAGE);
+
+
             return false;
         }
         return true;
     }
+
+    public static void callInternalAppDetailsScreen(Activity activity) {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
+        intent.setData(uri);
+
+        activity.startActivityForResult(intent, MY_CALL_APP_DETAILS);
+    }
+
+
 
     public static boolean fileExists(String filePath) {
         File file = new File(filePath);
@@ -156,59 +190,6 @@ public class Util {
             }
         }).start();
     }
-
-
-
-
-
-    /*
-    public interface OnSincronizarVendedores {
-        void onSincronizarVendedores(Activity contexto, boolean sucesso, Exception e);
-    }
-
-    public void sincronizarVendedores(final Activity contexto, final OnSincronizarVendedores sincronizarVendedores) {
-        try {
-            if (!Internet.VerificarInternet(contexto))
-                throw new Exception(" Não será possivel sincronizar os dados pois não foi identificado nenhum tipo de conexão com a internet");
-            WebServiceJSON webService = new WebServiceJSON();
-            atualizaMensagemProgressoAguardandoWebService(contexto, "Vendedores");
-            webService.ObterVendedores(new WebServiceJSON.OnObterVendedoresWebService() {
-                @Override
-                public void onObterVendedoresWebService(List<Vendedor> vendedores, Exception e) {
-                    try {
-                        if (e == null && vendedores != null) {
-                            Banco mDbHelper = new Banco(contexto);
-                            SQLiteDatabase db = mDbHelper.getWritableDatabase();
-                            db.execSQL("Delete From " + FeedReaderContract.FeedVendedores.TABLE_NAME);
-                            long contadorVendedores = 1;
-                            for (Vendedor vendedor : vendedores) {
-                                atualizaMensagemProgressoRegistros(contexto, "Vendedores", contadorVendedores++, vendedores.size());
-                                if (!Vendedor.InserirSQL(db, vendedor)) {
-                                    mDbHelper.close();
-                                    db.close();
-                                    sincronizarVendedores.onSincronizarVendedores(contexto, false, new Exception("Erro ao atualizar tabela: " + FeedReaderContract.FeedVendedores.TABLE_NAME));
-                                    return;
-                                }
-                            }
-
-                            mDbHelper.close();
-                            db.close();
-                            sincronizarVendedores.onSincronizarVendedores(contexto, true, e);
-                        } else {
-                            sincronizarVendedores.onSincronizarVendedores(contexto, false, e);
-                        }
-                    } catch (Exception e1) {
-                        sincronizarVendedores.onSincronizarVendedores(contexto, false, e1);
-                    }
-                }
-            });
-        } catch (Exception e) {
-            sincronizarVendedores.onSincronizarVendedores(contexto, false, e);
-        }
-    }
-*/
-
-
 
 
 

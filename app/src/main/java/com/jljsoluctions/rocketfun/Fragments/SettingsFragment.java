@@ -2,6 +2,7 @@ package com.jljsoluctions.rocketfun.Fragments;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
+import android.view.View;
 
 import com.jljsoluctions.rocketfun.R;
 
@@ -20,4 +21,6 @@ public class SettingsFragment extends PreferenceFragment {
 
         addPreferencesFromResource(R.xml.settings);
     }
+
+
 }

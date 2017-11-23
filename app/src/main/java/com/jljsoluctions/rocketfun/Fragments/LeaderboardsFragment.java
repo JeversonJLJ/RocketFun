@@ -9,7 +9,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -20,7 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.jljsoluctions.rocketfun.Class.Preferences;
 import com.jljsoluctions.rocketfun.R;
-import com.jljsoluctions.rocketfun.Util;
+import com.jljsoluctions.rocketfun.Class.Useful;
 
 /**
  * Created by jever on 20/09/2017.
@@ -62,7 +61,7 @@ public class LeaderboardsFragment extends Fragment {
         }
 
         if (onlyWifiConnected)
-            if (!Util.checkWifiConected(this.getActivity()))
+            if (!Useful.checkWifiConected(this.getActivity()))
                 return rootView;
 
 

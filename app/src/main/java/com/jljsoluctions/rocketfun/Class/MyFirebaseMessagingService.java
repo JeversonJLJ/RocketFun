@@ -1,4 +1,4 @@
-package com.jljsoluctions.rocketfun;
+package com.jljsoluctions.rocketfun.Class;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 

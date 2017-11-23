@@ -1,4 +1,4 @@
-package com.jljsoluctions.rocketfun;
+package com.jljsoluctions.rocketfun.Activity;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.jljsoluctions.rocketfun.Fragments.SettingsFragment;
+import com.jljsoluctions.rocketfun.R;
 
 /**
  * Created by jever on 19/11/2017.

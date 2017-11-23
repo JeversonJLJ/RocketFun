@@ -2,8 +2,6 @@ package com.jljsoluctions.rocketfun.Fragments;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -16,29 +14,25 @@ import android.widget.ExpandableListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.jljsoluctions.rocketfun.Adapters.ExpandableAdapterSounds;
-import com.jljsoluctions.rocketfun.GroupSound;
-import com.jljsoluctions.rocketfun.MainActivity;
+import com.jljsoluctions.rocketfun.Entities.GroupSound;
 import com.jljsoluctions.rocketfun.R;
-import com.jljsoluctions.rocketfun.Sound;
-import com.jljsoluctions.rocketfun.Util;
+import com.jljsoluctions.rocketfun.Entities.Sound;
+import com.jljsoluctions.rocketfun.Class.Useful;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.jljsoluctions.rocketfun.Util.APP_STORAGE_PATCH;
+import static com.jljsoluctions.rocketfun.Class.Useful.APP_STORAGE_PATCH;
 
 /**
  * Created by jever on 20/09/2017.
@@ -86,7 +80,7 @@ public class SoundsFragment extends Fragment {
         mlistDataHeader = new ArrayList<GroupSound>();
         mlistDataChild = new HashMap<String, List<Sound>>();
         loading(true);
-        if (Util.checkWritePermission(this.getActivity()) && Util.checkReadPermission(this.getActivity())) {
+        if (Useful.checkStorageWritePermission(this.getActivity()) && Useful.checkStorageReadPermission(this.getActivity())) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -173,11 +167,11 @@ public class SoundsFragment extends Fragment {
         String soundPath = APP_STORAGE_PATCH + "/" + soundName;
 
         //Image downlaod
-        if (!Util.fileExists(APP_STORAGE_PATCH + "/" + imageName)) {
+        if (!Useful.fileExists(APP_STORAGE_PATCH + "/" + imageName)) {
             mStorageRef = mStorage.getReferenceFromUrl(dataSnapshot.child("ImageURL").getValue(String.class));
             new File(APP_STORAGE_PATCH).mkdirs();
             File imageFile = new File(APP_STORAGE_PATCH, imageName);
-            Util.firebaseDownloadFile(this.getActivity(),mStorageRef, imageFile);
+            Useful.firebaseDownloadFile(this.getActivity(),mStorageRef, imageFile);
         }
 
 

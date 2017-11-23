@@ -1,21 +1,23 @@
-package com.jljsoluctions.rocketfun;
+package com.jljsoluctions.rocketfun.Activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -34,15 +36,19 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 import com.jljsoluctions.rocketfun.Adapters.ViewPagerAdapter;
+import com.jljsoluctions.rocketfun.BuildConfig;
+import com.jljsoluctions.rocketfun.Class.Useful;
+import com.jljsoluctions.rocketfun.Dialog.Dialog;
 import com.jljsoluctions.rocketfun.Fragments.LeaderboardsFragment;
 import com.jljsoluctions.rocketfun.Fragments.NewsFragment;
 import com.jljsoluctions.rocketfun.Fragments.SoundsFragment;
+import com.jljsoluctions.rocketfun.R;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-
+    private static boolean showingPermissionMessage = false;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -67,7 +73,10 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        if (!Useful.firebasePersistenceCalledAlready) {
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+            Useful.firebasePersistenceCalledAlready = true;
+        }
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -91,7 +100,6 @@ public class MainActivity extends AppCompatActivity
         navigationView.setBackgroundColor(colorPrimaryDark);
         navigationView.setItemTextColor(ColorStateList.valueOf(Color.WHITE));
         navigationView.setItemIconTintList(ColorStateList.valueOf(Color.WHITE));
-
 
 
         AdView adView = (AdView) findViewById(R.id.adView);
@@ -140,7 +148,6 @@ public class MainActivity extends AppCompatActivity
                 });
 
 
-
         //Initializing viewPager
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         viewPager.setOffscreenPageLimit(3);
@@ -186,6 +193,7 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
+
     }
 
     private void allotEachTabWithEqualWidth() {
@@ -268,7 +276,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_main) {
 
-        } else if (id == R.id.nav_settings){
+        } else if (id == R.id.nav_settings) {
             Intent i = new Intent(MainActivity.this, SettingsActivity.class);
             MainActivity.this.startActivity(i);
         } else if (id == R.id.nav_email) {
@@ -286,4 +294,100 @@ public class MainActivity extends AppCompatActivity
 
         return true;
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == Useful.MY_CALL_APP_DETAILS ||
+                requestCode == Useful.MY_WRITE_SETTINGS) {
+            if (Useful.checkStorageWritePermission(this) &&
+                    Useful.checkStorageReadPermission(this)) {
+                restartApp();
+                return;
+            }
+
+            if (requestCode == Useful.MY_CALL_APP_DETAILS)
+                Dialog.showDialogMessage(this, getString(R.string.storage_permission_message), new Dialog.OnClickOkDialogMessage() {
+                    @Override
+                    public void onClickOkDialogMessage() {
+                        Useful.checkStorageWritePermission(MainActivity.this);
+                        Useful.checkStorageReadPermission(MainActivity.this);
+                    }
+                });
+
+
+
+
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (!showingPermissionMessage) {
+            for (String permission : permissions) {
+                if (requestCode == Useful.MY_WRITE_SETTINGS) {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                        showingPermissionMessage = true;
+                        Dialog.showDialogMessage(this, getString(R.string.write_settings_permission_message), new Dialog.OnClickOkDialogMessage() {
+                            @Override
+                            public void onClickOkDialogMessage() {
+                                Useful.checkWriteSettingsPermission(MainActivity.this);
+                                showingPermissionMessage = false;
+                            }
+                        });
+                    } else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        restartApp();
+                        finish();
+                    } else {
+                        Useful.checkStorageReadPermission(this);
+                    }
+                }
+
+                if (requestCode == Useful.MY_READ_EXTERNAL_STORAGE) {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                        showingPermissionMessage = true;
+                        Dialog.showDialogMessage(this, getString(R.string.storage_permission_message), new Dialog.OnClickOkDialogMessage() {
+                            @Override
+                            public void onClickOkDialogMessage() {
+                                Useful.callInternalAppDetailsScreen(MainActivity.this);
+                                showingPermissionMessage = false;
+                            }
+                        });
+                    } else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        restartApp();
+                        finish();
+                    } else {
+                        Useful.checkStorageReadPermission(this);
+                    }
+                }
+                if (requestCode == Useful.MY_WRITE_EXTERNAL_STORAGE) {
+                    if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                        showingPermissionMessage = true;
+                        Dialog.showDialogMessage(this, getString(R.string.storage_permission_message), new Dialog.OnClickOkDialogMessage() {
+                            @Override
+                            public void onClickOkDialogMessage() {
+                                Useful.callInternalAppDetailsScreen(MainActivity.this);
+                                showingPermissionMessage = false;
+                            }
+                        });
+                    } else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        restartApp();
+                        finish();
+                    } else {
+                        Useful.checkStorageWritePermission(this);
+                    }
+                }
+            }
+        }
+    }
+
+    private void restartApp() {
+        Intent intent = new Intent(MainActivity.this,
+                SplashScreenActivity.class);
+        startActivity(intent);
+    }
+
+
 }

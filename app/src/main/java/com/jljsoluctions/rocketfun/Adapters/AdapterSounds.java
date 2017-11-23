@@ -28,7 +28,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.jljsoluctions.rocketfun.BuildConfig;
 import com.jljsoluctions.rocketfun.R;
-import com.jljsoluctions.rocketfun.Sound;
+import com.jljsoluctions.rocketfun.Entities.Sound;
 
 import java.io.File;
 import java.util.ArrayList;

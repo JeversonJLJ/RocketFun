@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -70,13 +71,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Call Splash Screen
+        Intent intent = new Intent(MainActivity.this,
+                SplashScreenActivity.class);
+        startActivity(intent);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (!Useful.firebasePersistenceCalledAlready) {
-            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-            Useful.firebasePersistenceCalledAlready = true;
-        }
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -316,8 +318,6 @@ public class MainActivity extends AppCompatActivity
                 });
 
 
-
-
         }
     }
 
@@ -337,14 +337,11 @@ public class MainActivity extends AppCompatActivity
                                 showingPermissionMessage = false;
                             }
                         });
-                    } else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    } else if (Useful.checkStorageReadPermission(this)) {
                         restartApp();
                         finish();
-                    } else {
-                        Useful.checkStorageReadPermission(this);
                     }
                 }
-
                 if (requestCode == Useful.MY_READ_EXTERNAL_STORAGE) {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
                         showingPermissionMessage = true;
@@ -355,11 +352,9 @@ public class MainActivity extends AppCompatActivity
                                 showingPermissionMessage = false;
                             }
                         });
-                    } else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    } else if (Useful.checkStorageReadPermission(this)) {
                         restartApp();
                         finish();
-                    } else {
-                        Useful.checkStorageReadPermission(this);
                     }
                 }
                 if (requestCode == Useful.MY_WRITE_EXTERNAL_STORAGE) {
@@ -372,11 +367,9 @@ public class MainActivity extends AppCompatActivity
                                 showingPermissionMessage = false;
                             }
                         });
-                    } else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    } else if (Useful.checkStorageWritePermission(this)) {
                         restartApp();
                         finish();
-                    } else {
-                        Useful.checkStorageWritePermission(this);
                     }
                 }
             }

@@ -7,8 +7,8 @@ android {
         applicationId "com.jljsoluctions.rocketfun"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 8
-        versionName "4.0"
+        versionCode 9
+        versionName "4.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

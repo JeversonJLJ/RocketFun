@@ -8,12 +8,30 @@
     tools:context="com.jljsoluctions.rocketfun.Activity.MainActivity">
 
 
-    <include layout="@layout/content_main" />
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/nest_scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Your Scrollable contents should be here - such as,
+        ViewPager or etc -->
+        <include
+            layout="@layout/activity_tab_main"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            />
+    </android.support.v4.widget.NestedScrollView>
+
+
 
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
         android:theme="@style/AppTheme.AppBarOverlay">
 
 
@@ -22,6 +40,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            app:layout_scrollFlags="scroll|enterAlways"
 
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 

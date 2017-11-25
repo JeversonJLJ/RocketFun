@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,7 +42,6 @@ import static com.jljsoluctions.rocketfun.Class.Useful.APP_STORAGE_PATCH;
 public class SoundsFragment extends Fragment {
 
 
-
     private ExpandableListView mlvwSongs;
     private List<GroupSound> mlistDataHeader;
     private HashMap<String, List<Sound>> mlistDataChild;
@@ -51,8 +51,6 @@ public class SoundsFragment extends Fragment {
     private DatabaseReference mDataBase;
     private BaseExpandableListAdapter mlistAdapter;
     private View rootView;
-
-
 
 
     public SoundsFragment() {
@@ -76,6 +74,8 @@ public class SoundsFragment extends Fragment {
 
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReferenceFromUrl("gs://rocket-fun.appspot.com/");
+
+
 
         mlistDataHeader = new ArrayList<GroupSound>();
         mlistDataChild = new HashMap<String, List<Sound>>();
@@ -171,11 +171,11 @@ public class SoundsFragment extends Fragment {
             mStorageRef = mStorage.getReferenceFromUrl(dataSnapshot.child("ImageURL").getValue(String.class));
             new File(APP_STORAGE_PATCH).mkdirs();
             File imageFile = new File(APP_STORAGE_PATCH, imageName);
-            Useful.firebaseDownloadFile(this.getActivity(),mStorageRef, imageFile);
+            Useful.firebaseDownloadFile(this.getActivity(), mStorageRef, imageFile);
         }
 
 
-        Sound newSound = new Sound(dataSnapshot.child("SoundDescription").getValue(String.class), soundName, Uri.parse(imagePath), Uri.parse(soundPath), Long.parseLong(dataSnapshot.child("id").getValue(String.class)),mStorage.getReferenceFromUrl(dataSnapshot.child("SoundURL").getValue(String.class)));
+        Sound newSound = new Sound(dataSnapshot.child("SoundDescription").getValue(String.class), soundName, Uri.parse(imagePath), Uri.parse(soundPath), Long.parseLong(dataSnapshot.child("id").getValue(String.class)), mStorage.getReferenceFromUrl(dataSnapshot.child("SoundURL").getValue(String.class)));
         boolean existsSound = false;
         for (Sound item : sounds) {
             if (item.getSoundTitle().equals(newSound.getSoundTitle()))
@@ -245,7 +245,6 @@ public class SoundsFragment extends Fragment {
         });
 
     }
-
 
 
 }

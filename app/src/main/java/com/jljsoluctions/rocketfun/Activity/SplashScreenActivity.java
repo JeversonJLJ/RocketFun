@@ -27,7 +27,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         handle.postDelayed(new Runnable() {
             @Override
             public void run() {
-                //showMainActivity();
+                showMainActivity();
                 finish();
         }
         }, 3000);

@@ -12,12 +12,8 @@
             android:id="@+id/tabMain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
             app:tabGravity="fill"
-            app:tabIndicatorColor="@color/colorAccent"
-            app:tabMode="scrollable"
-            app:tabSelectedTextColor="@color/colorAccent"
-            app:tabTextColor="@color/grey">
+            app:tabMode="scrollable">
 
 
             <android.support.design.widget.TabItem

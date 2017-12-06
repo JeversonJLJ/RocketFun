@@ -18,7 +18,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
     android:padding="@dimen/playback_controls_padding">
 
     <RelativeLayout
@@ -38,7 +37,6 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-
             />
         <TextView
             android:id="@+id/group_sound_title"
@@ -51,7 +49,6 @@
             android:maxLines="1"
             android:layout_centerVertical="true"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/colorAccent"
             tools:text="Group Name" />
 
     </RelativeLayout>

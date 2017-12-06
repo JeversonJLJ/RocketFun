@@ -24,10 +24,9 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
-import com.jljsoluctions.rocketfun.Activity.MainActivity;
 import com.jljsoluctions.rocketfun.BuildConfig;
 import com.jljsoluctions.rocketfun.Dialog.Dialog;
-import com.jljsoluctions.rocketfun.Entities.GroupSound;
+import com.jljsoluctions.rocketfun.Entities.SoundGroup;
 import com.jljsoluctions.rocketfun.R;
 import com.jljsoluctions.rocketfun.Entities.Sound;
 import com.jljsoluctions.rocketfun.Class.Useful;
@@ -46,7 +45,7 @@ import static com.jljsoluctions.rocketfun.Class.Useful.APP_STORAGE_PATCH;
 public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
     private LayoutInflater mInflater;
     private HashMap<String, List<Sound>> soundList;
-    private List<GroupSound> soundGroupList;
+    private List<SoundGroup> soundGroupList;
     private MediaPlayer currentSound;
     private ImageButton currentPlayingButton;
     private ProgressBar currentProgressBar;
@@ -56,7 +55,7 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
     private boolean downloadingSound = false;
 
 
-    public ExpandableAdapterSounds(Activity activity, List<GroupSound> soundGroupList, HashMap<String, List<Sound>> soundList) {
+    public ExpandableAdapterSounds(Activity activity, List<SoundGroup> soundGroupList, HashMap<String, List<Sound>> soundList) {
         this.soundList = soundList;
         this.soundGroupList = soundGroupList;
         this.activity = activity;
@@ -134,8 +133,8 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
-        GroupSound groupSound = (GroupSound) getGroup(groupPosition);
-        String headerTitle = groupSound.getGroupTitle();
+        SoundGroup soundGroup = (SoundGroup) getGroup(groupPosition);
+        String headerTitle = soundGroup.getGroupTitle();
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this.activity
                     .getSystemService(activity.LAYOUT_INFLATER_SERVICE);
@@ -145,7 +144,7 @@ public class ExpandableAdapterSounds extends BaseExpandableListAdapter {
                 .findViewById(R.id.group_image);
         TextView lblListHeader = (TextView) convertView
                 .findViewById(R.id.group_sound_title);
-        if (groupSound.isNewGroupSound())
+        if (soundGroup.isNewGroupSound())
             imgNewGroup.setVisibility(View.VISIBLE);
         else
             imgNewGroup.setVisibility(View.INVISIBLE);

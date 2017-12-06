@@ -22,10 +22,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity
     private static boolean showingPermissionMessage = false;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private MenuInflater inflater;
 
     ViewPager mViewPager;
     //This is our tablayout
@@ -72,9 +75,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //Call Splash Screen
-        Intent intent = new Intent(MainActivity.this,
-                SplashScreenActivity.class);
-        startActivity(intent);
+        //Intent intent = new Intent(MainActivity.this,
+        //        SplashScreenActivity.class);
+        //startActivity(intent);
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -92,16 +95,7 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        int colorPrimaryDark = 0;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            colorPrimaryDark = getResources().getColor(R.color.colorPrimary, null);
-        } else {
-            colorPrimaryDark = getResources().getColor(R.color.colorPrimary);
-        }
 
-        navigationView.setBackgroundColor(colorPrimaryDark);
-        navigationView.setItemTextColor(ColorStateList.valueOf(Color.WHITE));
-        navigationView.setItemIconTintList(ColorStateList.valueOf(Color.WHITE));
 
 
         AdView adView = (AdView) findViewById(R.id.adView);
@@ -252,9 +246,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        inflater= getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+
+
         return true;
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

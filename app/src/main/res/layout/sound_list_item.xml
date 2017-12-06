@@ -17,7 +17,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
     android:padding="@dimen/playback_controls_padding">
 
     <ImageView
@@ -27,6 +26,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
+
         android:contentDescription="@string/currently_playing_song"
         android:scaleType="fitXY"
         android:gravity="center_vertical"
@@ -59,7 +59,6 @@
                 android:ellipsize="end"
                 android:maxLines="3"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/colorAccent"
                 tools:text="Go To Need a Tune About That 2 asdasdasdasdaqweqwe" />
         </LinearLayout>
 
@@ -80,7 +79,6 @@
                 android:contentDescription="@string/play_pause"
                 android:padding="8dp"
                 android:src="@android:drawable/ic_popup_reminder"
-                android:tint="@color/grey"
                 android:tintMode="src_in" />
 
             <ProgressBar
@@ -101,7 +99,6 @@
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="@string/play_pause"
                 android:src="@drawable/play"
-                android:tint="@color/grey"
                 android:tintMode="src_in" />
 
             <ProgressBar

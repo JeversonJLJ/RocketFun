@@ -30,4 +30,5 @@
     <string name="sound_successful_set_ringtone">Sound successful set as ringtone!</string>
     <string name="sound_successful_set_alarm">Sound successful set as alarm!</string>
     <string name="sound_successful_set_notification">Sound successful set as notification!</string>
+    <string name="title_search">Search</string>
 </resources>

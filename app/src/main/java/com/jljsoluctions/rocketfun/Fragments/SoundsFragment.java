@@ -4,15 +4,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.NestedScrollView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
@@ -22,15 +24,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.jljsoluctions.rocketfun.Adapters.ExpandableAdapterSounds;
-import com.jljsoluctions.rocketfun.Entities.GroupSound;
+import com.jljsoluctions.rocketfun.Adapters.SoundsAdapter;
+import com.jljsoluctions.rocketfun.Entities.SoundGroup;
 import com.jljsoluctions.rocketfun.R;
 import com.jljsoluctions.rocketfun.Entities.Sound;
 import com.jljsoluctions.rocketfun.Class.Useful;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.jljsoluctions.rocketfun.Class.Useful.APP_STORAGE_PATCH;
@@ -41,16 +43,20 @@ import static com.jljsoluctions.rocketfun.Class.Useful.APP_STORAGE_PATCH;
 
 public class SoundsFragment extends Fragment {
 
-
+    private RecyclerView recyclerView;
+    private SoundsAdapter adapter;
     private ExpandableListView mlvwSongs;
-    private List<GroupSound> mlistDataHeader;
-    private HashMap<String, List<Sound>> mlistDataChild;
+    //private List<SoundGroup> mlistDataHeader;
+    //private HashMap<String, List<Sound>> mlistDataChild;
     private ProgressBar mProgressBar;
     private FirebaseStorage mStorage;
     private StorageReference mStorageRef;
     private DatabaseReference mDataBase;
-    private BaseExpandableListAdapter mlistAdapter;
+    //private BaseExpandableListAdapter mlistAdapter;
+    private List<SoundGroup> mlistGroup;
+    private List<SoundGroup> mlistGroupSearch;
     private View rootView;
+    private SearchView mSearchView;
 
 
     public SoundsFragment() {
@@ -75,10 +81,10 @@ public class SoundsFragment extends Fragment {
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReferenceFromUrl("gs://rocket-fun.appspot.com/");
 
-
-
-        mlistDataHeader = new ArrayList<GroupSound>();
-        mlistDataChild = new HashMap<String, List<Sound>>();
+        ViewGroup root = rootView.findViewById(R.id.fragment_root);
+        //TransitionManager.beginDelayedTransition(root, new AutoTransition());
+        //mlistDataHeader = new ArrayList<SoundGroup>();
+        // mlistDataChild = new HashMap<String, List<Sound>>();
         loading(true);
         if (Useful.checkStorageWritePermission(this.getActivity()) && Useful.checkStorageReadPermission(this.getActivity())) {
             new Thread(new Runnable() {
@@ -95,37 +101,132 @@ public class SoundsFragment extends Fragment {
         }
 
 
-        mlvwSongs = (ExpandableListView) rootView.findViewById(R.id.lvwSongs);
+        //mlvwSongs = (ExpandableListView) rootView.findViewById(R.id.lvwSongs);
 
         //prepareListData();
-        mlistAdapter = new ExpandableAdapterSounds(this.getActivity(), mlistDataHeader, mlistDataChild);
-        mlvwSongs.setAdapter(mlistAdapter);
+        // mlistAdapter = new ExpandableAdapterSounds(this.getActivity(), mlistDataHeader, mlistDataChild);
+        //mlvwSongs.setAdapter(mlistAdapter);
+
+
+        mlistGroup = new ArrayList<SoundGroup>();
+
+        recyclerView = rootView.findViewById(R.id.recyclerViewSoundsGroup);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
+
+        adapter = new SoundsAdapter(this.getActivity(), mlistGroup);
+        recyclerView.setAdapter(adapter);
 
 
         return rootView;
     }
 
+    private void search(String imput) {
+        mlistGroupSearch = new ArrayList<SoundGroup>();
+        for (SoundGroup soundGroup : mlistGroup)
+            mlistGroupSearch.add(soundGroup.getClone());
+
+        for (SoundGroup soundGroup : mlistGroupSearch) {
+            Iterator<Sound> i = soundGroup.getSoundItemList().iterator();
+            while (i.hasNext()) {
+                Sound sound = i.next();
+                if (!sound.getSoundTitle().toLowerCase().contains(imput.toLowerCase()) && !soundGroup.getGroupTitle().toLowerCase().contains(imput.toLowerCase()))
+                    i.remove();
+            }
+        }
+
+        Iterator<SoundGroup> i = mlistGroupSearch.iterator();
+        while (i.hasNext()) {
+            SoundGroup soundGroup = i.next();
+            if (soundGroup.getSoundItemList().size() == 0)
+                i.remove();
+        }
+
+        updateAdapter(mlistGroupSearch);
+
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main, menu);
+        inflater.inflate(R.menu.main_sounds, menu);
         super.onCreateOptionsMenu(menu, inflater);
+
+        mSearchView = (SearchView) menu.findItem(R.id.action_srv).getActionView();
+        mSearchView.setIconifiedByDefault(false);
+        mSearchView.setQueryHint("Name of group or sound");
+        //mSearchView.setFocusable(true);
+        // mSearchView.setIconified(false);
+        //mSearchView.requestFocusFromTouch();
+
+        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateAdapter(mlistGroup);
+                    }
+                }).start();
+                return false;
+            }
+        });
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(final String imput) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        search(imput);
+                    }
+                }).start();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText.isEmpty())
+                    updateAdapter(mlistGroup);
+                return false;
+            }
+        });
+
+
     }
 
 
-    private void updateAdapter() {
+    private void updateAdapter(final List<SoundGroup> soundGroups) {
         SoundsFragment.this.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mlistAdapter = new ExpandableAdapterSounds(SoundsFragment.this.getActivity(), mlistDataHeader, mlistDataChild);
-                mlvwSongs.setAdapter(mlistAdapter);
+                adapter = new SoundsAdapter(SoundsFragment.this.getActivity(), soundGroups);
+                recyclerView.setAdapter(adapter);
                 mProgressBar.setVisibility(View.GONE);
             }
         });
     }
 
+    private List<Sound> searchSoundsInGroup(String groupDescription) {
+        for (SoundGroup itemGroup : mlistGroup) {
+            if (itemGroup.getGroupTitle().equals(groupDescription))
+                return itemGroup.getSoundItemList();
+
+        }
+        return null;
+    }
+
+    private void setSoundsInGroup(String groupDescription, List<Sound> sounds) {
+        for (SoundGroup itemGroup : mlistGroup) {
+            if (itemGroup.getGroupTitle().equals(groupDescription)) {
+                itemGroup.setSoundItemList(sounds);
+                return;
+            }
+        }
+
+    }
+
+
     private void removeSound(DataSnapshot dataSnapshot) {
 
-        List<Sound> sounds = mlistDataChild.get(dataSnapshot.child("GroupDescription").getValue(String.class));
+        List<Sound> sounds = searchSoundsInGroup(dataSnapshot.child("GroupDescription").getValue(String.class));
         if (sounds != null) {
             for (Sound sound : sounds) {
                 if (sound.getId() == Long.parseLong(dataSnapshot.child("id").getValue(String.class))) {
@@ -134,21 +235,23 @@ public class SoundsFragment extends Fragment {
                 }
             }
         }
-        for (GroupSound groupName : mlistDataHeader) {
-            sounds = mlistDataChild.get(groupName.getGroupTitle());
+        for (SoundGroup groupName : mlistGroup) {
+            sounds = searchSoundsInGroup(groupName.getGroupTitle());
             if (sounds != null) {
                 if (sounds.size() == 0) {
-                    mlistDataHeader.remove(groupName);
+                    mlistGroup.remove(groupName);
                     break;
                 }
             }
         }
-        mlistAdapter.notifyDataSetChanged();
+        //mlistAdapter.notifyDataSetChanged();
+        //adapter.notifyDataSetChanged();
+        updateAdapter(mlistGroup);
     }
 
     private void addSound(DataSnapshot dataSnapshot) {
         boolean existsGroup = false;
-        for (GroupSound groupName : mlistDataHeader) {
+        for (SoundGroup groupName : mlistGroup) {
             if (groupName.getGroupTitle().equalsIgnoreCase(dataSnapshot.child("GroupDescription").getValue(String.class))) {
                 existsGroup = true;
                 if (Boolean.parseBoolean(dataSnapshot.child("newGroupSound").getValue(String.class)))
@@ -157,8 +260,11 @@ public class SoundsFragment extends Fragment {
             }
         }
         if (!existsGroup)
-            mlistDataHeader.add(new GroupSound(dataSnapshot.child("GroupDescription").getValue(String.class), Boolean.parseBoolean(dataSnapshot.child("newGroupSound").getValue(String.class))));
-        List<Sound> sounds = mlistDataChild.get(dataSnapshot.child("GroupDescription").getValue(String.class));
+            mlistGroup.add(new SoundGroup(dataSnapshot.child("GroupDescription").getValue(String.class), Boolean.parseBoolean(dataSnapshot.child("newGroupSound").getValue(String.class))));
+        //  mlistDataHeader.add(new SoundGroup(dataSnapshot.child("GroupDescription").getValue(String.class), Boolean.parseBoolean(dataSnapshot.child("newGroupSound").getValue(String.class))));
+
+
+        List<Sound> sounds = searchSoundsInGroup(dataSnapshot.child("GroupDescription").getValue(String.class));
         if (sounds == null)
             sounds = new ArrayList<Sound>();
         final String imageName = dataSnapshot.child("ImageName").getValue(String.class);
@@ -184,9 +290,10 @@ public class SoundsFragment extends Fragment {
         if (!existsSound)
             sounds.add(newSound);
 
-
-        mlistDataChild.put(dataSnapshot.child("GroupDescription").getValue(String.class), sounds); // Header, Child data
-        mlistAdapter.notifyDataSetChanged();
+        setSoundsInGroup(dataSnapshot.child("GroupDescription").getValue(String.class), sounds);
+        //mlistAdapter.notifyDataSetChanged();
+        //adapter.notifyDataSetChanged();
+        updateAdapter(mlistGroup);
 
     }
 

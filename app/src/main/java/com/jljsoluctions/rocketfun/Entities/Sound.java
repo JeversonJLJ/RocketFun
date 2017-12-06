@@ -8,7 +8,7 @@ import com.google.firebase.storage.StorageReference;
  * Created by jever on 18/03/2017.
  */
 
-public class Sound {
+public class Sound implements Cloneable {
 
     private String soundTitle;
     private String soundName;
@@ -19,13 +19,23 @@ public class Sound {
     private long id;
 
 
-    public Sound(String soundTitle,String soundName, Uri imageUri, Uri soundUri, long id, StorageReference firebaseStorageRef){
+    public Sound(String soundTitle, String soundName, Uri imageUri, Uri soundUri, long id, StorageReference firebaseStorageRef) {
         this.soundTitle = soundTitle;
         this.soundName = soundName;
         this.imageUri = imageUri;
         this.soundUri = soundUri;
         this.id = id;
         this.firebaseStorageRef = firebaseStorageRef;
+    }
+
+    public Sound getClone() {
+        try {
+            // call clone in Object.
+            return (Sound) super.clone();
+        } catch (CloneNotSupportedException e) {
+            System.out.println (" Cloning not allowed. " );
+            return this;
+        }
     }
 
     public long getId() {
